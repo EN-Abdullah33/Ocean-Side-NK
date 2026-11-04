@@ -622,25 +622,26 @@ function renderComments(){
   renderCmtTicker();
 }
  
-/* ================= نظام التحقق الثنائي (2FA) وتسجيل الدخول الآمن ================= */
+/* ================= نظام التحقق الثنائي (2FA) المحدث للإرسال المباشر على الواتساب ================= */
 let pendingOtp = null;
 
 function openLogin(){
-  modal({title:'👤 دخول المدير الآمن (تحقق ثنائي 2FA)',
+  const adminWa = normPhone(data.settings.whatsapp) || "966502174243";
+  modal({title:'👤 دخول المدير الآمن (تحقق ثنائي 2FA عبر الواتساب)',
     body:`<div id="loginStep1">
-        <label>كلمة المرور</label><input type="password" id="lPw" autofocus>
+        <label>كلمة المرور</label><input type="password" id="lPw" autofocus placeholder="أدخل كلمة المرور الحالية">
         <div class="err" id="lErr"></div>
-        <p class="note">سيتم إرسال رمز التحقق الثنائي إلى بريدك الإلكتروني الإداري المحمي.</p>
+        <p class="note">سيتم إرسال رمز التحقق الثنائي تلقائياً إلى رقم الواتساب المسجل (${adminWa}).</p>
       </div>
       <div id="loginStep2" class="hidden">
         <div style="background:#e6f7f5;border:2px solid var(--teal);padding:12px;border-radius:12px;margin-bottom:10px;text-align:center;">
-          <b>🔐 تم إرسال رمز التحقق (6 أرقام) عبر الواتساب:</b><br><span style="color:var(--navy);font-weight:bold;" dir="ltr">رقم المشرف المسجل</span>
+          <b>🔐 تم إنشاء رمز التحقق الثنائي ورساله إلى الواتساب:</b><br><span style="color:var(--navy);font-weight:bold;" dir="ltr">+${adminWa}</span>
         </div>
-        <label>أدخل رمز التحقق</label><input type="text" id="lOtp" maxlength="6" placeholder="123456" dir="ltr" style="letter-spacing:4px;font-size:1.2rem;text-align:center;">
+        <label>أدخل رمز التحقق (6 أرقام)</label><input type="text" id="lOtp" maxlength="6" placeholder="123456" dir="ltr" style="letter-spacing:4px;font-size:1.2rem;text-align:center;">
         <div class="err" id="lOtpErr"></div>
       </div>`,
     actions:[
-      {label:'إرسال رمز التحقق', cls:'', fn:()=>{
+      {label:'متابعة', cls:'', fn:()=>{
         if($('loginStep1').classList.contains('hidden')){
           const enteredOtp = $('lOtp').value.trim();
           if(enteredOtp === pendingOtp){
@@ -655,12 +656,11 @@ function openLogin(){
           if(SECURE_CRED.verifyPw($('lPw').value)){
             pendingOtp = Math.floor(100000 + Math.random() * 900000).toString();
             
-            const adminWa = normPhone(data.settings.whatsapp) || "966502174243";
             const otpMsg = `🔐 *رمز التحقق الثنائي (2FA)*\nرمز الدخول الخاص بك لمدير المنيو هو: *${pendingOtp}*`;
             const waUrl = `https://wa.me/${adminWa}?text=${encodeURIComponent(otpMsg)}`;
             window.open(waUrl, '_blank');
 
-            alert(`[تم تحويلك للواتساب]\nتم إرسال رمز التحقق إلى واتساب المشرف.\nرمز التحقق للتجربة السريعة هو: ${pendingOtp}`);
+            toast(`تم فتح واتساب لإرسال الرمز: ${pendingOtp}`);
             
             $('loginStep1').classList.add('hidden');
             $('loginStep2').classList.remove('hidden');
@@ -694,8 +694,8 @@ function settingsModal(){
   modal({title:'⚙️ الإعدادات وتغيير كلمة المرور',
     body:`<label>اسم المطعم</label><input id="sN" value="${esc(s.name)}">
       <label>العملة</label><input id="sC" value="${esc(s.currency)}">
-      <label>رقم واتساب لاستقبال الطلبات</label><input id="sWa" inputmode="tel" dir="ltr" value="${esc(s.whatsapp)}" placeholder="966502174243">
-      <p class="note">اكتبه بالصيغة المحلية (05xxxxxxxx) أو الدولية، وتصل إليه كل الطلبات.</p>
+      <label>رقم واتساب استقبال الطلبات والتحقق الثنائي</label><input id="sWa" inputmode="tel" dir="ltr" value="${esc(s.whatsapp)}" placeholder="966502174243">
+      <p class="note">اكتبه بالصيغة المحلية (05xxxxxxxx) أو الدولية، وتصل إليه كل الطلبات ورموز الدخول.</p>
       
       <hr style="margin:16px 0;border:none;border-top:1px solid var(--line)">
       <h3 style="color:var(--navy);font-size:1rem;margin-bottom:6px">🔒 تغيير كلمة المرور</h3>
